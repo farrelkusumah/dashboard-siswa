@@ -22,4 +22,17 @@ class Siswa extends BaseController
         ];
         return view('siswa/index', $data);
     }
+
+    //Create
+
+    public function create()
+    {
+        $this -> siswaModel -> insert([
+            'nama' => $this->request->getPost('nama'),
+            'nis' => $this->request->getPost('nis'),
+            'tanggal_lahir' => $this->request->getPost('tanggal_lahir'),
+            'asal' => $this->request->getPost('asal'),
+        ]);
+        return redirect()->to('/siswa');
+    }
 }

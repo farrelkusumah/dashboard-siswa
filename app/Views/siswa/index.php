@@ -9,7 +9,28 @@
 </head>
 
 <body>
-    HALAMAN DASHBOARD SISWA
+    <h1>HALAMAN DASHBOARD SISWA</h1>
+
+    <form action="/siswa/create" method="post">
+        <div class="mb-3">
+            <label for="nama" class="form-label">Nama</label>
+            <input type="text" class="form-control" id="nama" name="nama" required>
+        </div>
+        <div class="mb-3">
+            <label for="nis" class="form-label">NIS</label>
+            <input type="text" class="form-control" id="nis" name="nis" required>
+        </div>
+        <div class="mb-3">
+            <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+            <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" required>
+        </div>
+        <div class="mb-3">
+            <label for="asal" class="form-label">Asal</label>
+            <input type="text" class="form-control" id="asal" name="asal" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Tambah Siswa</button>
+    </form>
+
     <table class="table table-striped">
         <thead>
             <tr>
