@@ -49,4 +49,13 @@ class Siswa extends BaseController
         ]);
         return redirect()->to('/siswa');
     }
+
+    //Delete
+
+    public function delete($id)
+    {
+        $this->siswaModel->delete($id);
+        return redirect()->to('/siswa');
+    }
 }
+
