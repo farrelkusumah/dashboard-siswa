@@ -1,69 +1,153 @@
-# CodeIgniter 4 Application Starter
+# Student Data (CodeIgniter 4 CRUD)
 
-## What is CodeIgniter?
+A simple CRUD application for managing student records, built as a learning project for CodeIgniter 4 and the MVC pattern. Everything lives on a single page: a form on top and a table below.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## Features
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+- **Create**: add a student through the form
+- **Read**: list students in a table, newest first
+- **Update**: edit a student (the form is pre-filled via `?edit=ID`)
+- **Delete**: remove a student with a confirmation prompt
+- **Search**: search by name, origin, or both (matches from the start of the text)
+- `created_at` and `updated_at` are filled automatically
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## Data Model
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+| Column | Type | Notes |
+|---|---|---|
+| id | INT | Primary key, auto increment |
+| nama | VARCHAR(100) | Full name |
+| tanggal_lahir | DATE | Date of birth, format `YYYY-MM-DD` |
+| asal | VARCHAR(100) | City/region of origin |
+| created_at | DATETIME | Filled automatically |
+| updated_at | DATETIME | Filled automatically |
 
-## Installation & updates
+## Tech Stack
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+- PHP 8.3
+- CodeIgniter 4
+- MySQL (via Laragon)
+- Bootstrap 5.3 (CDN)
+- HeidiSQL for database management
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+## Prerequisites
 
-## Setup
+- PHP 8.1 or newer
+- Composer
+- A running MySQL/MariaDB server (e.g. Laragon)
+- Enabled PHP extensions: `intl`, `mbstring`, `mysqli`, `curl`
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+## Installation
 
-## Important Change with index.php
+1. **Clone or copy the project**, then enter its folder:
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+   ```bash
+   cd your-project-folder
+   ```
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+2. **Install dependencies** (if there is no `vendor` folder yet):
 
-**Please** read the user guide for a better explanation of how CI4 works!
+   ```bash
+   composer install
+   ```
 
-## Repository Management
+3. **Create the `.env` file** from the template:
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+   ```bash
+   copy env .env
+   ```
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+4. **Configure the environment and database** in `.env`:
 
-## Server Requirements
+   ```
+   CI_ENVIRONMENT = development
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+   database.default.hostname = localhost
+   database.default.database = basic_crud
+   database.default.username = root
+   database.default.password =
+   database.default.DBDriver = MySQLi
+   database.default.port = 3306
+   ```
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+5. **Create the database** `basic_crud` in HeidiSQL (collation `utf8mb4_general_ci`).
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+6. **Run the migration** to create the table:
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+   ```bash
+   php spark migrate
+   ```
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+7. **Start the server**:
+
+   ```bash
+   php spark serve
+   ```
+
+8. Open **http://localhost:8080/siswa**
+
+## Project Structure
+
+```
+app/
+├── Config/Routes.php                 # Route definitions
+├── Controllers/Siswa.php             # Flow logic (index, store, update, delete)
+├── Models/SiswaModel.php             # Access to the siswa table
+├── Database/Migrations/              # Migration that creates the siswa table
+└── Views/siswa/index.php             # UI (form + table + search)
+```
+
+## Routes
+
+| Method | URL | Controller Method | Purpose |
+|---|---|---|---|
+| GET | `/siswa` | `Siswa::index` | Show the list, form, and search results |
+| POST | `/siswa/simpan` | `Siswa::store` | Save a new student |
+| POST | `/siswa/perbarui/{id}` | `Siswa::update` | Update a student |
+| POST | `/siswa/hapus/{id}` | `Siswa::delete` | Delete a student |
+
+### URL Parameters (GET)
+
+| Parameter | Example | Purpose |
+|---|---|---|
+| `edit` | `/siswa?edit=5` | Fill the form with student #5's data |
+| `cari` | `/siswa?cari=ban` | Search keyword |
+| `kolom` | `/siswa?kolom=asal&cari=ban` | Limit the search: `nama`, `asal`, or empty (both) |
+
+## How It Works (MVC)
+
+```
+Browser → Routes → Controller → Model → Database
+                       ↓
+                     View → HTML → Browser
+```
+
+1. **Routes** match the URL to a controller method.
+2. **Controller** receives the request and asks the model for data.
+3. **Model** is the only layer that talks to the database.
+4. **View** renders the data as HTML.
+
+After create, update, or delete, the controller **redirects** to `/siswa` so that refreshing the page does not resubmit the form (Post/Redirect/Get pattern).
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `Invalid file: "siswa/index.php"` | Make sure the view is at `app/Views/siswa/index.php` |
+| 404 when clicking Save/Delete | Check the POST routes in `app/Config/Routes.php` |
+| 403 "action not allowed" | Make sure the form includes `<?= csrf_field() ?>` |
+| Database connection error | Check `.env`, the database name, and that MySQL is running |
+| Warning `Unable to load dynamic library 'json'` | Comment out `extension=json` in `php.ini` with a leading `;` |
+| Port 8080 already in use | Run `php spark serve --port 8081` |
+
+## Roadmap
+
+- [ ] Form validation (name required, minimum 3 characters)
+- [ ] Success messages with flashdata
+- [ ] Pagination
+- [ ] Modal UI with a three-dot action menu
+- [ ] JSON API version for consuming from Next.js
+
+## Notes
+
+The `.env` file contains database configuration and must not be uploaded to GitHub (it is already in CodeIgniter's default `.gitignore`).
