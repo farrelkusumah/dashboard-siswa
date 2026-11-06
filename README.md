@@ -1,153 +1,173 @@
-# Student Data (CodeIgniter 4 CRUD)
+# Dashboard Siswa
 
-A simple CRUD application for managing student records, built as a learning project for CodeIgniter 4 and the MVC pattern. Everything lives on a single page: a form on top and a table below.
+A simple student data dashboard built with CodeIgniter 4 and Bootstrap 5 for CRUD operations. The app lets you add, edit, delete, and search student data from one page.
 
 ## Features
 
-- **Create**: add a student through the form
-- **Read**: list students in a table, newest first
-- **Update**: edit a student (the form is pre-filled via `?edit=ID`)
-- **Delete**: remove a student with a confirmation prompt
-- **Search**: search by name, origin, or both (matches from the start of the text)
-- `created_at` and `updated_at` are filled automatically
+- Add new student data using the form
+- View all students in a table
+- Edit student data by selecting a row
+- Delete student data with confirmation
+- Search students by name, NIS, or origin
+- Automatic `created_at` and `updated_at` timestamps
 
 ## Data Model
 
 | Column | Type | Notes |
 |---|---|---|
 | id | INT | Primary key, auto increment |
-| nama | VARCHAR(100) | Full name |
-| tanggal_lahir | DATE | Date of birth, format `YYYY-MM-DD` |
-| asal | VARCHAR(100) | City/region of origin |
-| created_at | DATETIME | Filled automatically |
-| updated_at | DATETIME | Filled automatically |
+| nama | VARCHAR(100) | Student name |
+| nis | VARCHAR(100) | Student number |
+| tanggal_lahir | DATE | Date of birth in `YYYY-MM-DD` format |
+| asal | VARCHAR(100) | Origin / school region |
+| created_at | DATETIME | Automatically set |
+| updated_at | DATETIME | Automatically updated |
 
 ## Tech Stack
 
-- PHP 8.3
+- PHP 8.x
 - CodeIgniter 4
-- MySQL (via Laragon)
-- Bootstrap 5.3 (CDN)
-- HeidiSQL for database management
+- MySQL / MariaDB
+- Bootstrap 5.3
+- Composer
 
 ## Prerequisites
 
 - PHP 8.1 or newer
 - Composer
-- A running MySQL/MariaDB server (e.g. Laragon)
-- Enabled PHP extensions: `intl`, `mbstring`, `mysqli`, `curl`
+- MySQL/MariaDB running locally
+- PHP extensions: `intl`, `mbstring`, `mysqli`, `curl`
 
 ## Installation
 
-1. **Clone or copy the project**, then enter its folder:
+1. Clone or copy the project into your working folder:
 
    ```bash
-   cd your-project-folder
+   cd dashboard-siswa
    ```
 
-2. **Install dependencies** (if there is no `vendor` folder yet):
+2. Install dependencies:
 
    ```bash
    composer install
    ```
 
-3. **Create the `.env` file** from the template:
+3. Create the `.env` file from the template:
 
    ```bash
    copy env .env
    ```
 
-4. **Configure the environment and database** in `.env`:
+4. Configure the database in `.env`:
 
-   ```
+   ```env
    CI_ENVIRONMENT = development
 
    database.default.hostname = localhost
-   database.default.database = basic_crud
+   database.default.database = data_siswa
    database.default.username = root
    database.default.password =
    database.default.DBDriver = MySQLi
    database.default.port = 3306
    ```
 
-5. **Create the database** `basic_crud` in HeidiSQL (collation `utf8mb4_general_ci`).
+5. Create the database in MySQL/HeidiSQL:
 
-6. **Run the migration** to create the table:
+   ```sql
+   CREATE DATABASE data_siswa;
+   ```
+
+6. Run the migration:
 
    ```bash
    php spark migrate
    ```
 
-7. **Start the server**:
+7. Start the app:
 
    ```bash
    php spark serve
    ```
 
-8. Open **http://localhost:8080/siswa**
+8. Open the app in the browser:
+
+   ```text
+   http://localhost:8080/siswa
+   ```
 
 ## Project Structure
 
-```
+```text
 app/
-├── Config/Routes.php                 # Route definitions
-├── Controllers/Siswa.php             # Flow logic (index, store, update, delete)
-├── Models/SiswaModel.php             # Access to the siswa table
-├── Database/Migrations/              # Migration that creates the siswa table
-└── Views/siswa/index.php             # UI (form + table + search)
+├── Config/
+│   └── Routes.php                # Route definitions
+├── Controllers/
+│   └── Siswa.php                 # CRUD logic
+├── Models/
+│   └── SiswaModel.php            # Data access for data_siswa table
+├── Database/
+│   └── Migrations/
+│       └── 2026-11-06-033854_DataSiswa.php
+├── Views/
+│   └── siswa/
+│       └── index.php            # Form, table, and search UI
+└── ...
 ```
 
 ## Routes
 
 | Method | URL | Controller Method | Purpose |
 |---|---|---|---|
-| GET | `/siswa` | `Siswa::index` | Show the list, form, and search results |
-| POST | `/siswa/simpan` | `Siswa::store` | Save a new student |
-| POST | `/siswa/perbarui/{id}` | `Siswa::update` | Update a student |
-| POST | `/siswa/hapus/{id}` | `Siswa::delete` | Delete a student |
+| GET | `/siswa` | `Siswa::index` | Display list, form, and search results |
+| POST | `/siswa/create` | `Siswa::create` | Add a new student |
+| POST | `/siswa/update/{id}` | `Siswa::update` | Update existing student data |
+| GET | `/siswa/delete/{id}` | `Siswa::delete` | Delete a student |
 
-### URL Parameters (GET)
+## Search Parameters
+
+The index page supports GET-based search:
 
 | Parameter | Example | Purpose |
 |---|---|---|
-| `edit` | `/siswa?edit=5` | Fill the form with student #5's data |
-| `cari` | `/siswa?cari=ban` | Search keyword |
-| `kolom` | `/siswa?kolom=asal&cari=ban` | Limit the search: `nama`, `asal`, or empty (both) |
+| `cari` | `/siswa?cari=farrel` | Search keyword |
+| `kategori` | `/siswa?kategori=nama&cari=farrel` | Search field: `nama`, `nis`, `asal`, or empty for all |
 
-## How It Works (MVC)
+Example search URLs:
 
+```text
+/siswa?cari=farrel
+/siswa?kategori=nama&cari=farrel
+/siswa?kategori=asal&cari=bandung
 ```
-Browser → Routes → Controller → Model → Database
+
+## How It Works
+
+```text
+Browser → Route → Controller → Model → Database
                        ↓
-                     View → HTML → Browser
+                     View → HTML
 ```
 
-1. **Routes** match the URL to a controller method.
-2. **Controller** receives the request and asks the model for data.
-3. **Model** is the only layer that talks to the database.
-4. **View** renders the data as HTML.
+1. The browser requests `/siswa`.
+2. The route calls `Siswa::index()`.
+3. The controller reads query parameters and filters the model data if needed.
+4. The model queries the `data_siswa` table.
+5. The view renders the form and table in HTML.
 
-After create, update, or delete, the controller **redirects** to `/siswa` so that refreshing the page does not resubmit the form (Post/Redirect/Get pattern).
+After create, update, or delete, the application redirects back to `/siswa` using the PRG pattern.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| `Invalid file: "siswa/index.php"` | Make sure the view is at `app/Views/siswa/index.php` |
-| 404 when clicking Save/Delete | Check the POST routes in `app/Config/Routes.php` |
-| 403 "action not allowed" | Make sure the form includes `<?= csrf_field() ?>` |
-| Database connection error | Check `.env`, the database name, and that MySQL is running |
-| Warning `Unable to load dynamic library 'json'` | Comment out `extension=json` in `php.ini` with a leading `;` |
-| Port 8080 already in use | Run `php spark serve --port 8081` |
-
-## Roadmap
-
-- [ ] Form validation (name required, minimum 3 characters)
-- [ ] Success messages with flashdata
-- [ ] Pagination
-- [ ] Modal UI with a three-dot action menu
-- [ ] JSON API version for consuming from Next.js
+| `Invalid file: "siswa/index.php"` | Confirm the file exists at `app/Views/siswa/index.php` |
+| 404 on save or delete | Check routes in `app/Config/Routes.php` |
+| 403 error / CSRF issue | Add `<?= csrf_field() ?>` to the form |
+| Database connection error | Check `.env` credentials and MySQL status |
+| `php spark` not recognized | Run from the project root and make sure Composer dependencies are installed |
 
 ## Notes
 
-The `.env` file contains database configuration and must not be uploaded to GitHub (it is already in CodeIgniter's default `.gitignore`).
+- The `.env` file should not be committed to GitHub.
+- The project uses a single-page dashboard style with a form above the table and search controls above the data list.
+- The actual database table name is `data_siswa`.
