@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Controllers;
-use App\Models\SiswaModel; 
+
+use App\Models\SiswaModel;
 
 class Siswa extends BaseController
 {
@@ -16,10 +17,30 @@ class Siswa extends BaseController
     public function index()
     {
         $id = $this->request->getGet('id');
+        $searchQuery = trim((string) $this->request->getGet('cari'));
+        $searchCategory = trim((string) $this->request->getGet('kategori'));
+
+        if ($searchQuery !== '') {
+            if ($searchCategory === 'nama') {
+                $this->siswaModel->where('nama', $searchQuery);
+            } elseif ($searchCategory === 'asal') {
+                $this->siswaModel->where('asal', $searchQuery);
+            } elseif ($searchCategory === 'nis') {
+                $this->siswaModel->like('nis', $searchQuery);
+            } else {
+                $this->siswaModel->groupStart()
+                    ->where('nama', $searchQuery)
+                    ->orWhere('asal', $searchQuery)
+                    ->orWhere('nis', $searchQuery)
+                    ->groupEnd();
+            }
+        }
 
         $data = [
             'daftarSiswa' => $this->siswaModel->orderBy('id', 'ASC')->findAll(),
-            'editSiswa' => $id ? $this->siswaModel->find($id) : null
+            'editSiswa' => $id ? $this->siswaModel->find($id) : null,
+            'searchQuery' => $searchQuery,
+            'searchCategory' => $searchCategory
         ];
         return view('siswa/index', $data);
     }
@@ -28,7 +49,7 @@ class Siswa extends BaseController
 
     public function create()
     {
-        $this -> siswaModel -> insert([
+        $this->siswaModel->insert([
             'nama'          => $this->request->getPost('nama'),
             'nis'           => $this->request->getPost('nis'),
             'tanggal_lahir' => $this->request->getPost('tanggal_lahir'),
@@ -58,4 +79,3 @@ class Siswa extends BaseController
         return redirect()->to('/siswa');
     }
 }
-

@@ -44,13 +44,41 @@
         }
 
         .form-control,
+        .form-select,
         .btn {
             border-radius: .6rem;
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 .2rem rgba(13, 110, 253, 0.12);
+        }
+
+        .search-wrap {
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .75rem;
+            width: 100%;
+        }
+
+        .search-select {
+            flex: 0 0 160px;
+        }
+
+        .search-input {
+            flex: 1 1 240px;
+        }
+
+        .search-form .btn {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
         }
 
         .table {
@@ -92,7 +120,13 @@
 </head>
 
 <body>
-    <?php $isEdit = ! empty($editSiswa); ?>
+    <?php
+    $isEdit         = ! empty($editSiswa);
+    $searchQuery    = $searchQuery ?? '';
+    $searchCategory = $searchCategory ?? '';
+    $isSearching    = $searchQuery !== '' || $searchCategory !== '';
+    $filter         = array_filter(['kategori' => $searchCategory, 'cari' => $searchQuery]);
+    ?>
 
     <header class="page-header text-white pt-4 pt-md-5">
         <div class="container content" style="margin-top:0">
@@ -103,7 +137,6 @@
 
     <main class="container content pb-5">
 
-        <!-- Form -->
         <section class="card-box p-4 mb-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h2 class="h5 fw-bold mb-0"><?= $isEdit ? 'Edit Siswa' : 'Tambah Siswa' ?></h2>
@@ -144,13 +177,34 @@
                         <?= $isEdit ? 'Simpan Perubahan' : 'Tambah Siswa' ?>
                     </button>
                     <?php if ($isEdit): ?>
-                        <a href="/siswa" class="btn btn-outline-secondary px-4">Batal</a>
+                        <a href="/siswa<?= $filter ? '?' . http_build_query($filter) : '' ?>" class="btn btn-outline-secondary px-4">Batal</a>
                     <?php endif; ?>
                 </div>
             </form>
         </section>
 
-        <!-- Tabel -->
+        <div class="card-box search-wrap">
+            <form method="get" action="/siswa" role="search" class="search-form">
+                <label for="cari-siswa" class="visually-hidden">Cari siswa</label>
+
+                <select class="form-select search-select" name="kategori" id="kategori-siswa" aria-label="Kategori pencarian">
+                    <option value="">Semua</option>
+                    <option value="nama" <?= $searchCategory === 'nama' ? 'selected' : '' ?>>Nama</option>
+                    <option value="nis" <?= $searchCategory === 'nis' ? 'selected' : '' ?>>NIS</option>
+                    <option value="asal" <?= $searchCategory === 'asal' ? 'selected' : '' ?>>Asal</option>
+                </select>
+
+                <input type="search" class="form-control search-input" id="cari-siswa" name="cari"
+                    placeholder="Cari nama, NIS, atau asal..." value="<?= esc($searchQuery) ?>">
+
+                <button type="submit" class="btn btn-primary">Cari</button>
+
+                <?php if ($isSearching): ?>
+                    <a href="/siswa" class="btn btn-outline-secondary">Reset</a>
+                <?php endif; ?>
+            </form>
+        </div>
+
         <section class="card-box overflow-hidden">
             <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom" style="border-color:var(--border)!important">
                 <h2 class="h6 fw-bold mb-0">Daftar Siswa</h2>
@@ -162,9 +216,9 @@
                     <thead>
                         <tr>
                             <th style="width:60px">No</th>
-                            <th style="width:130px; text-align: center;">NIS</th>
+                            <th class="text-center" style="width:130px">NIS</th>
                             <th>Nama</th>
-                            <th style="width:170px; text-align: center;">Tanggal Lahir</th>
+                            <th class="text-center" style="width:170px">Tanggal Lahir</th>
                             <th class="text-center">Asal</th>
                             <th class="text-center" style="width:170px">Aksi</th>
                         </tr>
@@ -177,12 +231,15 @@
                         <?php endif; ?>
 
                         <?php foreach ($daftarSiswa as $i => $s): ?>
-                            <?php $isSelected = $isEdit && $editSiswa['id'] == $s['id']; ?>
+                            <?php
+                            $isSelected = $isEdit && $editSiswa['id'] == $s['id'];
+                            $editLink   = '/siswa?' . http_build_query(array_merge(['id' => $s['id']], $filter));
+                            ?>
                             <tr class="<?= $isSelected ? 'row-edit' : '' ?>">
                                 <td class="text-secondary"><?= $i + 1 ?></td>
-                                <td><?= esc($s['nis']) ?></td>
+                                <td class="text-center"><?= esc($s['nis']) ?></td>
                                 <td class="fw-semibold"><?= esc($s['nama']) ?></td>
-                                <td>
+                                <td class="text-center">
                                     <?= $s['tanggal_lahir']
                                         ? \CodeIgniter\I18n\Time::parse($s['tanggal_lahir'], 'Asia/Jakarta', 'id')->toLocalizedString('d MMMM yyyy')
                                         : '-' ?>
@@ -190,7 +247,7 @@
                                 <td class="text-center"><?= esc($s['asal']) ?></td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="/siswa?id=<?= $s['id'] ?>" class="btn btn-outline-primary btn-action">Edit</a>
+                                        <a href="<?= esc($editLink) ?>" class="btn btn-outline-primary btn-action">Edit</a>
                                         <form action="/siswa/delete/<?= $s['id'] ?>" method="post"
                                             onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                             <?= csrf_field() ?>
