@@ -7,91 +7,205 @@
     <title>Data Siswa</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
+        :root {
+            --primary: #0d6efd;
+            --border: rgba(13, 110, 253, 0.1);
+        }
+
         body {
-            background-color: #f5f7fb;
+            background: linear-gradient(180deg, #f4f7ff 0%, #eef4ff 100%);
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
         }
 
         .page-header {
-            background: linear-gradient(135deg, #0d6efd, #4f8dfd);
+            background: linear-gradient(135deg, #0d6efd 0%, #3b82f6 100%);
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.2);
+            padding-bottom: 4rem;
+        }
+
+        .content {
+            max-width: 1000px;
+            margin-top: -2.5rem;
+        }
+
+        .card-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(13, 110, 253, 0.06);
+        }
+
+        .form-label {
+            font-size: .85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: .35rem;
+        }
+
+        .form-control,
+        .btn {
+            border-radius: .6rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, 0.12);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: #f8faff;
+            color: #4b5563;
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding: .9rem 1rem;
+            border-color: #f1f4fb;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8fbff;
+        }
+
+        .table tbody tr.row-edit,
+        .table tbody tr.row-edit:hover {
+            background-color: #fff7dd;
+        }
+
+        .btn-action {
+            min-width: 64px;
+            font-size: .8rem;
+            padding: .3rem .75rem;
         }
     </style>
 </head>
 
 <body>
-    <header class="page-header text-white py-4 py-md-5">
-        <div class="container">
-            <h1 class="h2 fw-bold mb-1">Data Siswa</h1>
+    <?php $isEdit = ! empty($editSiswa); ?>
+
+    <header class="page-header text-white pt-4 pt-md-5">
+        <div class="container content" style="margin-top:0">
+            <p class="mb-1 text-white-50 text-uppercase small fw-semibold">Dashboard</p>
+            <h1 class="h2 fw-bold mb-0">Data Siswa</h1>
         </div>
     </header>
-    <?php $isEdit = !empty($editSiswa); ?>
-    <div class="container my-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="h5 mb-3"><?= $isEdit ? 'Edit Siswa' : 'Tambah Siswa' ?></h2>
-                <form action="<?= $isEdit ? '/siswa/update/' . $editSiswa['id'] : '/siswa/create' ?>" method="post">
-                    <?= csrf_field() ?>
-                    <div class="mb-3">
-                        <label for="nama" class="form-label">Nama</label>
-                        <input type="text" class="form-control" id="nama" name="nama"
-                            value="<?= esc($editSiswa['nama'] ?? '') ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nis" class="form-label">NIS</label>
-                        <input type="text" class="form-control" id="nis" name="nis"
-                            value="<?= esc($editSiswa['nis'] ?? '') ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
-                        <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir"
-                            value="<?= esc($editSiswa['tanggal_lahir'] ?? '') ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="asal" class="form-label">Asal</label>
-                        <input type="text" class="form-control" id="asal" name="asal"
-                            value="<?= esc($editSiswa['asal'] ?? '') ?>" required>
-                    </div>
 
-                    <button type="submit" class="btn <?= $isEdit ?  'btn-success' :  'btn-primary' ?>">
+    <main class="container content pb-5">
+
+        <!-- Form -->
+        <section class="card-box p-4 mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h5 fw-bold mb-0"><?= $isEdit ? 'Edit Siswa' : 'Tambah Siswa' ?></h2>
+                <?php if ($isEdit): ?>
+                    <span class="badge text-bg-warning">Mode edit</span>
+                <?php endif; ?>
+            </div>
+
+            <form action="<?= $isEdit ? '/siswa/update/' . $editSiswa['id'] : '/siswa/create' ?>" method="post" class="row g-3">
+                <?= csrf_field() ?>
+
+                <div class="col-md-6">
+                    <label for="nama" class="form-label">Nama</label>
+                    <input type="text" class="form-control" id="nama" name="nama"
+                        value="<?= esc($editSiswa['nama'] ?? '') ?>" placeholder="Masukkan nama siswa" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="nis" class="form-label">NIS</label>
+                    <input type="text" class="form-control" id="nis" name="nis"
+                        value="<?= esc($editSiswa['nis'] ?? '') ?>" placeholder="Masukkan NIS" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                    <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir"
+                        value="<?= esc($editSiswa['tanggal_lahir'] ?? '') ?>" required>
+                </div>
+
+                <div class="col-md-8">
+                    <label for="asal" class="form-label">Asal</label>
+                    <input type="text" class="form-control" id="asal" name="asal"
+                        value="<?= esc($editSiswa['asal'] ?? '') ?>" placeholder="Masukkan asal sekolah atau daerah" required>
+                </div>
+
+                <div class="col-12 d-flex gap-2 pt-1">
+                    <button type="submit" class="btn <?= $isEdit ? 'btn-success' : 'btn-primary' ?> px-4 fw-semibold">
                         <?= $isEdit ? 'Simpan Perubahan' : 'Tambah Siswa' ?>
                     </button>
                     <?php if ($isEdit): ?>
-                        <a href="/siswa" class="btn btn-secondary">Batal</a>
+                        <a href="/siswa" class="btn btn-outline-secondary px-4">Batal</a>
                     <?php endif; ?>
-                </form>
+                </div>
+            </form>
+        </section>
+
+        <!-- Tabel -->
+        <section class="card-box overflow-hidden">
+            <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom" style="border-color:var(--border)!important">
+                <h2 class="h6 fw-bold mb-0">Daftar Siswa</h2>
+                <span class="badge rounded-pill text-bg-primary"><?= count($daftarSiswa) ?> siswa</span>
             </div>
-        </div>
-    </div>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>NIS</th>
-                <th>Nama</th>
-                <th>Tanggal Lahir</th>
-                <th>Asal</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($daftarSiswa as $i => $s): ?>
-                <tr>
-                    <td><?= $i + 1 ?></td>
-                    <td><?= esc($s['nis']) ?></td>
-                    <td><?= esc($s['nama']) ?></td>
-                    <td> <?= $s['tanggal_lahir']
-                                ? \CodeIgniter\I18n\Time::parse($s['tanggal_lahir'], 'Asia/Jakarta', 'id')->toLocalizedString('d MMMM yyyy')
-                                : '-' ?></td>
-                    <td><?= esc($s['asal']) ?></td>
-                    <td>
-                        <a href="/siswa?id=<?= $s['id'] ?>" class="text-blue"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen preview-icon"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg></a>
-                        <a href="/siswa/delete/<?= $s['id'] ?>" class="text-danger"
-                            onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash preview-icon"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></a>
-                    </td>
-                </tr>
-                <tr class="<?= $isEdit && $editSiswa['id'] == $s['id'] ? 'table-warning' : '' ?>">
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width:60px">No</th>
+                            <th style="width:130px; text-align: center;">NIS</th>
+                            <th>Nama</th>
+                            <th style="width:170px; text-align: center;">Tanggal Lahir</th>
+                            <th class="text-center">Asal</th>
+                            <th class="text-center" style="width:170px">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($daftarSiswa)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary py-5">Belum ada data siswa.</td>
+                            </tr>
+                        <?php endif; ?>
+
+                        <?php foreach ($daftarSiswa as $i => $s): ?>
+                            <?php $isSelected = $isEdit && $editSiswa['id'] == $s['id']; ?>
+                            <tr class="<?= $isSelected ? 'row-edit' : '' ?>">
+                                <td class="text-secondary"><?= $i + 1 ?></td>
+                                <td><?= esc($s['nis']) ?></td>
+                                <td class="fw-semibold"><?= esc($s['nama']) ?></td>
+                                <td>
+                                    <?= $s['tanggal_lahir']
+                                        ? \CodeIgniter\I18n\Time::parse($s['tanggal_lahir'], 'Asia/Jakarta', 'id')->toLocalizedString('d MMMM yyyy')
+                                        : '-' ?>
+                                </td>
+                                <td class="text-center"><?= esc($s['asal']) ?></td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="/siswa?id=<?= $s['id'] ?>" class="btn btn-outline-primary btn-action">Edit</a>
+                                        <form action="/siswa/delete/<?= $s['id'] ?>" method="post"
+                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-outline-danger btn-action">Hapus</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
 </body>
 
 </html>
