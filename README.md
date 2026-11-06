@@ -140,34 +140,3 @@ Example search URLs:
 /siswa?kategori=asal&cari=bandung
 ```
 
-## How It Works
-
-```text
-Browser → Route → Controller → Model → Database
-                       ↓
-                     View → HTML
-```
-
-1. The browser requests `/siswa`.
-2. The route calls `Siswa::index()`.
-3. The controller reads query parameters and filters the model data if needed.
-4. The model queries the `data_siswa` table.
-5. The view renders the form and table in HTML.
-
-After create, update, or delete, the application redirects back to `/siswa` using the PRG pattern.
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| `Invalid file: "siswa/index.php"` | Confirm the file exists at `app/Views/siswa/index.php` |
-| 404 on save or delete | Check routes in `app/Config/Routes.php` |
-| 403 error / CSRF issue | Add `<?= csrf_field() ?>` to the form |
-| Database connection error | Check `.env` credentials and MySQL status |
-| `php spark` not recognized | Run from the project root and make sure Composer dependencies are installed |
-
-## Notes
-
-- The `.env` file should not be committed to GitHub.
-- The project uses a single-page dashboard style with a form above the table and search controls above the data list.
-- The actual database table name is `data_siswa`.
